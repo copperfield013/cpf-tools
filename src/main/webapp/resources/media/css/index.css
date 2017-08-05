@@ -1,0 +1,29 @@
+@CHARSET "UTF-8";
+*{
+	font-family: 微软雅黑;
+	font-size: 14px;
+}
+div{
+	display: block;
+	float: left;
+}
+.list{
+	width: 100%;
+	position: relative;
+}
+.list dl{
+	display: block;
+	float: left;
+	border-bottom: solid 1px #aaa;
+	width: 100%;
+	padding: 1em 2em;
+}
+.list dt{
+	display: block;
+	float: left;
+	width: 6em;
+}
+.list dd{
+	display: block;
+	float: left;
+}
