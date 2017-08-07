@@ -164,7 +164,7 @@
         Iframe : function () {
             var frameId = settings.id;
             //var iframeStyle = 'border:0;position:absolute;width:0px;height:0px;right:0px;top:0px;';
-            var iframeStyle = 'border:0;position:absolute;width:' + settings.posWidth + ';height:' + settings.posRight + ';left:-100000px;top:-100000px;';
+            var iframeStyle = 'border:0;position:absolute;width:' + settings.posWidth + ';height:' + settings.posHight + ';left:-100000px;top:-100000px;';
             var iframe;
 
             try

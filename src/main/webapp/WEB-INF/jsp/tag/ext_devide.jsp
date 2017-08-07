@@ -51,7 +51,7 @@
 					<div class="form-group">
 						<label class="col-lg-2">内容</label>
 						<div class="col-lg-8">
-							<textarea id="content" class="form-control" rows="10" placeholder="条线名\t子条线,子条线"></textarea>
+							<textarea id="content" class="form-control" rows="10" placeholder="条线名&#9;子条线,子条线"></textarea>
 						</div>
 					</div>
 					<div class="form-group">
