@@ -179,7 +179,7 @@
 							;
 						
 						var devideArr = devides.split(',');
-						var firstDevide = devideArr.pop();
+						var firstDevide = devideArr.shift();
 							
 						var $table = $printTable.tmpl({
 							extName		: extName,
