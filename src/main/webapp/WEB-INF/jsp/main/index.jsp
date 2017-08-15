@@ -79,7 +79,7 @@
 							</div>
 							<div class="row">
 								<div class="col-lg-10">
-									<a class="btn btn-danger" target="_blank" href="tag/ext">1、条线二维码</a>
+									<a class="btn btn-danger" target="_blank" href="tag/static_ext_tag">1、条线二维码</a>
 									<a class="btn btn-danger" target="_blank" href="tag/event_tag">2、物流</a>
 									<a class="btn btn-danger" target="_blank" href="tag/ext_contact">3、条线联系方式</a>
 									<a class="btn btn-danger" target="_blank" href="tag/referList">4、材料清单</a>

@@ -46,7 +46,6 @@ table, thead, tbody, tr, td, th{
     padding: 0.2em 1em;
     text-align: center;
     white-space: nowrap;
-    overflow: hidden;
 }
 td.title{
 	width: 5em;
