@@ -26,11 +26,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import cn.sowell.copframe.dto.ajax.JsonRequest;
 import cn.sowell.copframe.dto.ajax.JsonResponse;
-import cn.sowell.copframe.utils.QrCodeUtils;
 import cn.sowell.copframe.utils.excel.ExcelReader;
 import cn.sowell.copframe.utils.excel.SheetHeader;
 import cn.sowell.copframe.utils.excel.SheetReader;
 import cn.sowell.copframe.utils.excel.poi.PoiExcelReader;
+import cn.sowell.copframe.utils.qrcode.QrCodeUtils;
 import cn.sowell.cpftools.model.tag.service.TagPrintService;
 
 import com.alibaba.fastjson.JSONArray;
