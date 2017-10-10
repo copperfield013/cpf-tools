@@ -177,7 +177,10 @@
 						$content.printArea({ 
 				    		mode 		: "iframe", 
 				    		extraHead 	: '<meta charset="utf-8" />,<meta http-equiv="X-UA-Compatible" content="chrome=1"/>',
-				    		extraCss	: $('base').attr('href') + 'media/css/print_tag.css'
+				    		extraCss	: $('base').attr('href') + 'media/css/print_tag.css',
+				    		posWidth	: '60mm',
+				    		posHeight	: '40mm',
+				    		deferMill	: 2000
 				    	});
 					}
 				});

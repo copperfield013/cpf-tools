@@ -9,7 +9,7 @@
 		<meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
 		<link rel="stylesheet" href="media/plugins/jquery-ui-1.12.1.custom/jquery-ui.css">
 		<script type="text/javascript" src="media/js/jquery-1.9.0.js"></script>
-		<script type="text/javascript" src="media/js/jquery.PrintArea.js"></script>
+		<script type="text/javascript" src="media/js/jquery.PrintArea.js?1111"></script>
 		<script src="media/plugins/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
 		<script src="media/js/jquery.ui.datepicker-zh-CN.js"></script>
 		<script src="media/plugins/fileUpload/jquery.fileupload.js"></script>
@@ -171,6 +171,9 @@
 						var options = { 
 				    		mode 		: "iframe", 
 				    		extraHead 	: headElements,
+				    		posWidth	: '60mm',
+				    		posHeight	: '40mm',
+				    		deferMill	: 2000,
 				    		extraCss	: $('base').attr('href') + 'media/css/print_tag.css'
 				    	};
 						var $container = $('#container').clone();

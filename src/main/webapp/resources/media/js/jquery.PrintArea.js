@@ -62,7 +62,7 @@
         var PrintAreaWindow = PrintArea.getPrintWindow();
 
         PrintArea.write( PrintAreaWindow.doc, $printSource );
-        setTimeout( function () { PrintArea.print( PrintAreaWindow ); }, settings.deferMillion );
+        setTimeout( function () { PrintArea.print( PrintAreaWindow ); }, settings.deferMill );
     };
 
     var PrintArea = {
@@ -164,7 +164,7 @@
         Iframe : function () {
             var frameId = settings.id;
             //var iframeStyle = 'border:0;position:absolute;width:0px;height:0px;right:0px;top:0px;';
-            var iframeStyle = 'border:0;position:absolute;width:' + settings.posWidth + ';height:' + settings.posHight + ';left:-100000px;top:-100000px;';
+            var iframeStyle = 'border:0;position:absolute;width:' + settings.posWidth + ';height:' + settings.posHeight + ';left:-100000px;top:-100000px;';
             var iframe;
 
             try

@@ -24,9 +24,9 @@ body{
 #container{
 	position: absolute;
 	left: 15px;
-	right: 10px;
-	top: 8px;
-	bottom: 4px;
+	right: 15px;
+	top: 12px;
+	bottom: 2px;
 }
 table{
 	width: 100%;

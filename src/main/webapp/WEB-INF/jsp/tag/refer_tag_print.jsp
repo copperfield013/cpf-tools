@@ -232,20 +232,22 @@
 				});
 				
 				function toReferMap(referStr, infoNo){
-					var refers = referStr.split('|');
 					var map = {}, index = 0;
-					for(var i in refers){
-						var split = refers[i].split(':');
-						var prefix = split[0],
-							list = split[1];
-						var items = list.split(',');
-						var arr = [], referList = [];
-						for(var j in items){
-							arr = arr.concat(convert(items[j]));
-						}
-						for(var j =0; j < 12; j++){
-							if(arr.indexOf(j) >= 0){
-								map['tit_' + index++] = prefix + infoNo + '-' + j;
+					if(referStr){
+						var refers = referStr.split('|');
+						for(var i in refers){
+							var split = refers[i].split(':');
+							var prefix = split[0],
+								list = split[1];
+							var items = list.split(',');
+							var arr = [], referList = [];
+							for(var j in items){
+								arr = arr.concat(convert(items[j]));
+							}
+							for(var j =0; j < 12; j++){
+								if(arr.indexOf(j) >= 0){
+									map['tit_' + index++] = prefix + infoNo + '-' + j;
+								}
 							}
 						}
 					}

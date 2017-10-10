@@ -19,16 +19,14 @@ body{
 .wrapper{
 	position: relative;
 	page-break-after: always;
-	width: 60mm;
 	height: 39mm;
-	overflow: hidden;
 }
 .table-page{
 	position: absolute;
-	left : 12px;
-	right : 0px;
-	top	: 13px;
-	bottom: 7px;
+	left : 15px;
+	right : 15px;
+	top	: 12px;
+	bottom: 8px;
 }
 table{
 	width: 100%;
@@ -38,11 +36,7 @@ table{
 table, thead, tbody, tr, td, th{
 	border-collapse: collapse;
     text-align: center;
-    overflow: hidden;
     border: 1px solid !important;
-}
-td, th{
-	padding: 2px 0;
 }
 td.toPeople{
 	text-align: center;

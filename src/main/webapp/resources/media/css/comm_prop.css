@@ -21,7 +21,6 @@ body{
 	page-break-after: always;
 	width: 60mm;
 	height: 39mm;
-	overflow: hidden;
 }
 .table-page{
 	position: absolute;
@@ -33,15 +32,12 @@ body{
 table{
 	width: 100%;
 	height: 100%;
-	border: 2px !important;
 	table-layout: fixed;
 }
 table, thead, tbody, tr, td, th{
 	border: 1px solid #000;
     border-collapse: collapse;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
 }
 td,th{
 	text-align: center;
