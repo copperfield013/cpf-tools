@@ -27,6 +27,11 @@
 	<!-- 扫描Controller -->
 	<context:component-scan base-package="cn.sowell.cpftools.*.controller.*" />
 	
+	<bean class="cn.sowell.cpftools.model.tag.service.FileUploadUtils">
+		<constructor-arg value="d://tools-files/" />
+		<constructor-arg value="/resources/dfiles/" />
+	</bean>
+	
 	<mvc:resources mapping="/extQrcodes/**" location="/resources/qrcodes/" />
 	
 </beans>

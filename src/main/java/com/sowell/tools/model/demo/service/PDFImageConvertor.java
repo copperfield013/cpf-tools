@@ -4,9 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
@@ -20,6 +23,8 @@ public class PDFImageConvertor {
 	private int[] converteIndex;
 	private PDFRenderer pdfRenderer;
 	private ProgressRecorder progressRecorder;
+	
+	Logger logger = Logger.getLogger(PDFImageConvertor.class);
 	
 	public PDFImageConvertor(InputStream inputStream, int dpi, int[] converteIndex) throws IOException{
 		this.document = PDDocument.load(inputStream);
@@ -39,20 +44,34 @@ public class PDFImageConvertor {
 		this.progressRecorder = progressRecorder;
 	}
 	
-	public void converte(OutputStream[] outputs) throws IOException{
+	public void converte(int[] indexs, OutputStream[] outputs) throws IOException{
 		Assert.notNull(outputs);
-		Assert.isTrue(outputs.length == this.converteIndex.length);
-		for (int i = 0; i < this.converteIndex.length; i++) {
-			BufferedImage bim = pdfRenderer.renderImageWithDPI(converteIndex[i], this.dpi,
+		Assert.isTrue(outputs.length == indexs.length);
+		for (int i = 0; i < indexs.length; i++) {
+			BufferedImage bim = pdfRenderer.renderImageWithDPI(indexs[i], this.dpi,
 					ImageType.RGB);
-			this.progressRecorder.setProgressMsg("正在转换第" + (i + 1) + "页").incStep();
-			System.out.println("正在转换第" + (i + 1) + "页");
+			this.progressRecorder.setProgressMsg("正在转换第" + (indexs[i] + 1) + "页，当前进度" + (i + 1) + "/" + indexs.length + "页").incStep();
+			logger.debug("正在转换第" + (indexs[i] + 1) + "/" + outputs.length + "页，当前进度" + (i + 1) + "/" + indexs.length + "页");
 			ImageIOUtil.writeImage(bim, "png", outputs[i], this.dpi);
 		}
 	}
 
-	public int[] getConverteIndex() {
-		return converteIndex;
+	public int[] getConverteIndex(Set<Integer> filter) {
+		if(filter == null){
+			return converteIndex;
+		}else{
+			List<Integer> list = new ArrayList<Integer>(); 
+			for(int i : converteIndex){
+				if(filter.contains(i)){
+					list.add(i);
+				}
+			}
+			int[] result = new int[list.size()];
+			for (int i = 0; i < result.length; i++) {
+				result[i] = list.get(i);
+			}
+			return result;
+		}
 	}
 
 	public void setConverteIndex(int[] converteIndex) {

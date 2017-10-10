@@ -4,18 +4,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -26,15 +29,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import cn.sowell.copframe.dto.ajax.JsonResponse;
+import cn.sowell.copframe.dto.format.FormatUtils;
+import cn.sowell.copframe.utils.TextUtils;
+import cn.sowell.cpftools.model.tag.service.FileUploadUtils;
 
-import com.google.gson.JsonObject;
+import com.alibaba.fastjson.JSONObject;
+import com.mchange.v1.io.InputStreamUtils;
 import com.sowell.tools.imp.utils.Table;
 import com.sowell.tools.model.demo.service.Excel;
 import com.sowell.tools.model.demo.service.PDFImageConvertor;
@@ -42,6 +50,7 @@ import com.sowell.tools.model.demo.service.PeopleId;
 import com.sowell.tools.model.demo.service.ZipService;
 import com.sowell.tools.model.demo.service.impl.ZipServiceImpl;
 import com.sowell.tools.util.FileUtils;
+import com.sowell.tools.util.ProgressBreakException;
 import com.sowell.tools.util.ProgressRecorder;
 
 @Controller
@@ -49,6 +58,10 @@ import com.sowell.tools.util.ProgressRecorder;
 public class DemoController {
 	ZipService zipService = new ZipServiceImpl();
 	
+	@Resource
+	FileUploadUtils fUtils;
+
+	Logger logger = Logger.getLogger(DemoController.class);
 	
 	@RequestMapping("index")
 	public String index(){
@@ -200,6 +213,138 @@ public class DemoController {
 	}
 	
 	@ResponseBody
+	@RequestMapping("/ajax_convert_pdf_status")
+	public String ajaxStatusConvertPdfImage(@RequestParam("uuid") String uuid, HttpSession session){
+		JSONObject jo = new JSONObject();
+		ProgressRecorder recorder = (ProgressRecorder) session.getAttribute(PDF_CONVERTE_PROGRESS + uuid);
+		if(recorder != null){
+			jo.put("progress", recorder.toJSON());
+			if(recorder.getError() != null){
+				jo.put("status", "error");
+				jo.put("errorMsg", recorder.getError());
+			}else{
+				if(recorder.isEnded()){
+					jo.put("status", "ended");
+				}else{
+					jo.put("status", "valid");
+				}
+			}
+		}else{
+			jo.put("status", "unknow-uuid");
+		}
+		return jo.toJSONString();
+	}
+	
+	@ResponseBody
+	@RequestMapping("ajax_convert_pdf")
+	public String ajaxConvertPdfToImage(
+			MultipartFile file,
+			String pageNo,
+			@RequestParam(defaultValue="300") Integer dpi,
+			HttpSession session
+			){
+		JSONObject jo = new JSONObject();
+		if(file != null && !file.isEmpty()){
+			try {
+				final InputStream ins = file.getInputStream();
+				final String uuid = TextUtils.uuid();
+				ProgressRecorder recorder = new ProgressRecorder();
+				final Set<Integer> filter = pageNo == null || pageNo.isEmpty()? null: new LinkedHashSet<Integer>();
+				if(filter != null){
+					Set<Integer> set = new LinkedHashSet<Integer>();
+					String[] keyArray = pageNo.split(",");
+					for (String key : keyArray) {
+						Integer value = FormatUtils.toInteger(key);
+						if(value != null){
+							set.add(value);
+						}
+					}
+					set.forEach(e->{filter.add(e-1);});
+				}
+				Runnable run = new Runnable() {
+					
+					@Override
+					public void run() {
+						recorder.setProgressMsg("开始转换");
+						try {
+							recorder.setProgressMsg("正在计算转换的页数");
+							//创建转换器
+							PDFImageConvertor convertor = new PDFImageConvertor(ins, dpi, null, recorder);
+							//获得要转换的页号
+							int[] convertIndex = convertor.getConverteIndex(filter);
+							if(convertIndex.length > 0){
+								recorder.setProgressMsg("需要转换" + convertIndex.length + "页");
+								recorder.setData("totalPage", convertIndex.length);
+								recorder.setStepLength(recorder.getTotal() / convertIndex.length / 2);
+								//构造输出流数组
+								FileOutputStream[] fos = new FileOutputStream[convertIndex.length];
+								//构造输出图片文件对象数组
+								File[] fs = new File[convertIndex.length];
+								//数组内所有文件对象都构造一个文件对象
+								for (int i = 0; i < fos.length; i++) {
+									File f = File.createTempFile("pdf_to_img", "");
+									fs[i] = f;
+									fos[i] = new FileOutputStream(f);
+								}
+								//将所有页转换为图片
+								convertor.converte(convertIndex, fos);
+								//关闭准唤起
+								convertor.getDocument().close();
+								//关闭输出流，完成转换
+								for (FileOutputStream item : fos) {
+									item.close();
+								}
+								//当输出文件有多个时，进行压缩
+								String fileName = getFileNameNoEx(StringUtils.getFilename(file.getOriginalFilename()));
+								recorder.setData("fileOriginName", fileName);
+								if(fs.length == 1){
+									recorder.setProgressMsg("正在生成图片");
+									fUtils.copyFrom(fs[0], uuid + ".png");
+								}else{
+									recorder.setProgressMsg("正在压缩" + fs.length + "张图片");
+									//progressRecorder.setProgressMsg("正在压缩图片为zip文件");
+									//压缩图片文件为zip文件
+									recorder.setProgressMsg("生成zip压缩文件");
+									FileOutputStream outputStream = fUtils.createFile(uuid + ".zip");
+									zipService.zip(fs, outputStream, fileName, "png", recorder);
+									try {
+										outputStream.close();
+									} catch (Exception e) {
+										logger.error("关闭输出流时发生错误");
+									}
+								}
+								recorder.setProgressMsg("生成成功");
+								recorder.fullProgress();
+							}else{
+								recorder.setProgressMsg("无法在PDF中找到可以转换的页面");
+								recorder.setError("指定页码错误");
+							}
+						}catch (ProgressBreakException breaked) {
+							logger.error("转换过程被中断");
+							recorder.setError("转换过程被中断");
+						}catch (Exception e) {
+							logger.error("转换时发生错误", e);
+							recorder.setError("转换时发生错误");
+						} finally{
+							recorder.setEnded();
+						}
+					}
+					
+				};
+				session.setAttribute(PDF_CONVERTE_PROGRESS + uuid, recorder);
+				Thread thread = new Thread(run);
+				thread.start();
+				jo.put("uuid", uuid);
+				jo.put("status", "start");
+			} catch (IOException e) {
+				jo.put("status", "error");
+				logger.error("", e);
+			}
+		}
+		return jo.toJSONString();
+	}
+	/*
+	@ResponseBody
 	@RequestMapping("converter_pdf_to_img")
 	public ResponseEntity<byte[]> converterPdfToImage(ModelAndView mv,
 			@RequestParam("file") CommonsMultipartFile file,
@@ -256,7 +401,48 @@ public class DemoController {
 			e.printStackTrace();
 		}
 		return null;
+	}*/
+	
+	
+	
+	@ResponseBody
+	@RequestMapping("/download_pdf_converted/{uuid}")
+	public ResponseEntity<byte[]> downloadPdfConverted(@PathVariable String uuid, HttpSession session){
+		ProgressRecorder recorder = (ProgressRecorder) session.getAttribute(PDF_CONVERTE_PROGRESS + uuid);
+		if(recorder != null){
+			String ext = ".zip";
+			InputStream fi = fUtils.getInputStream(uuid + ".zip");
+			if(fi == null){
+				fi = fUtils.getInputStream(uuid + ".png");
+				ext = ".png";
+			}
+			
+			if(fi != null){
+				//输出下载文件
+				HttpHeaders headers = new HttpHeaders();    
+				try {
+					byte[] bytes = InputStreamUtils.getBytes(fi);
+					if(fi != null){
+						try {
+							// 为了解决中文名称乱码问题
+							headers.setContentDispositionFormData("attachment", new String(
+									String.valueOf(recorder.getData("fileOriginName") + ext).getBytes("UTF-8"), "iso-8859-1"));
+						} catch (UnsupportedEncodingException e) {
+							headers.setContentDispositionFormData("attachment", "Converted_PDF" + ext);
+						}
+						headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);   
+						return new ResponseEntity<byte[]>(bytes,
+								headers, HttpStatus.CREATED);    
+						
+					}
+				} catch (IOException e) {
+					logger.error("获取文件流时发生错误", e);
+				}
+			}
+		}
+		return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
 	}
+	
 	
 	@ResponseBody
 	@RequestMapping("download")
@@ -282,21 +468,6 @@ public class DemoController {
 	
 	
 	private static String PDF_CONVERTE_PROGRESS = "pdf_converte_progress";
-	
-	
-	@ResponseBody
-	@RequestMapping("ajax_pdf_converte_progress")
-	public String ajaxPdfConverteProgress(HttpServletRequest request){
-		HttpSession session = request.getSession();
-		ProgressRecorder progressRecorder = (ProgressRecorder) session.getAttribute(PDF_CONVERTE_PROGRESS);
-		JsonObject jo = new JsonObject();
-		if(progressRecorder == null){
-			jo.addProperty("status", "unknow");
-			return jo.toString();
-		}else{
-			return progressRecorder.toJSON();
-		}
-	}
 	
 	
 	

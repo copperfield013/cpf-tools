@@ -38,7 +38,12 @@
 			<artifactId>copframe</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-				<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
+		<dependency>
+			<groupId>cn.sowell.copframe</groupId>
+			<artifactId>cpf-utils</artifactId>
+			<version>0.3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 		<dependency>
 		    <groupId>org.apache.pdfbox</groupId>
 		    <artifactId>pdfbox</artifactId>
@@ -63,9 +68,9 @@
 		    <version>3.2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>cn.sowell</groupId>
+			<groupId>cn.sowell.copframe</groupId>
 			<artifactId>cpf-excel</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

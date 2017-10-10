@@ -7,31 +7,32 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.springframework.util.StringUtils;
 
 import com.sowell.tools.model.demo.service.ZipService;
+import com.sowell.tools.util.ProgressRecorder;
 
 public class ZipServiceImpl implements ZipService{
 
 	@Override
 	public void zip(File[] files, OutputStream outputStream) {
-		this.zip(files, outputStream, null, null);
+		this.zip(files, outputStream, null, null, null);
 	}
 	
 	@Override
-	public void zip(File[] files, OutputStream outputStream, String prefix, String extName) {
+	public void zip(File[] files, OutputStream outputStream, String prefix, String extName, ProgressRecorder record) {
 		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+		record = record == null? new ProgressRecorder(): record;
 		try {
 			int inc = 1;
 			Map<String, Integer> nameMap = new HashMap<String, Integer>();
 			for (File file : files) {
-				System.out.println("压缩第" + inc + "个文件");
+				record.setProgressMsg("正在压缩第" + inc + "/" + files.length + "个文件");
+				System.out.println("正在压缩第" + inc + "/" + files.length + "个文件");
 				if(file.isFile()){
 					String name = null;
 					if(prefix != null){
@@ -59,6 +60,7 @@ public class ZipServiceImpl implements ZipService{
 		            }
 		            input.close();
 				}
+				record.incStep();
 			}
 			zipOutputStream.close();
 		} catch (FileNotFoundException e) {
