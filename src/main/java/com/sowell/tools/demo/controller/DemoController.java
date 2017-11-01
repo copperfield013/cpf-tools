@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -407,7 +409,7 @@ public class DemoController {
 	
 	@ResponseBody
 	@RequestMapping("/download_pdf_converted/{uuid}")
-	public ResponseEntity<byte[]> downloadPdfConverted(@PathVariable String uuid, HttpSession session){
+	public ResponseEntity<byte[]> downloadPdfConverted(@PathVariable String uuid, HttpSession session, HttpServletRequest request){
 		ProgressRecorder recorder = (ProgressRecorder) session.getAttribute(PDF_CONVERTE_PROGRESS + uuid);
 		if(recorder != null){
 			String ext = ".zip";
@@ -423,16 +425,28 @@ public class DemoController {
 				try {
 					byte[] bytes = InputStreamUtils.getBytes(fi);
 					if(fi != null){
+						String userAgent = request.getHeader("User-Agent").toUpperCase();
+				        String fileName = recorder.getData("fileOriginName") + ext;
 						try {
-							// 为了解决中文名称乱码问题
-							headers.setContentDispositionFormData("attachment", new String(
-									String.valueOf(recorder.getData("fileOriginName") + ext).getBytes("UTF-8"), "iso-8859-1"));
+							if (userAgent.contains("MSIE") || userAgent.contains("TRIDENT") || userAgent.contains("EDGE")) {
+							    fileName = URLEncoder.encode(fileName, "utf-8");
+							    fileName = fileName.replace("+", "%20");    //IE下载文件名空格变+号问题
+							} else {
+							    fileName = new String(fileName.getBytes("utf-8"), "iso-8859-1");
+							}
+							headers.set("Content-disposition", "attachment; filename=\"" + fileName + "\"");
 						} catch (UnsupportedEncodingException e) {
 							headers.setContentDispositionFormData("attachment", "Converted_PDF" + ext);
+							logger.error("不支持编码", e);
 						}
+				        headers.set("Content-Length", String.valueOf(bytes.length));
+						
+						
+						// 为了解决中文名称乱码问题
+//							headers.setContentDispositionFormData("attachment", );
 						headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);   
 						return new ResponseEntity<byte[]>(bytes,
-								headers, HttpStatus.CREATED);    
+								headers, HttpStatus.OK);    
 						
 					}
 				} catch (IOException e) {
