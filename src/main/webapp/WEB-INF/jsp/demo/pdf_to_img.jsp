@@ -86,7 +86,7 @@
 					<div class="form-group">
 						<div class="col-lg-offset-3 col-lg-6">
 							<input id="submit" type="button" class="btn btn-primary btn-lg" value="转换" />
-							<input id="reset-btn" type="button" class="btn btn-primary btn-lg" value="重新转换" />
+							<!-- <input id="reset-btn" type="button" class="btn btn-primary btn-lg" value="重新转换" /> -->
 						</div>
 					</div>
 					<div class="form-group">
@@ -146,15 +146,26 @@
 					}
 				}
 				
+				$('#file').click(function(){
+					resetPage();
+				});
+				
 				$('#pageNoStr').keypress(pageNoResolve).change(pageNoResolve);
 				
-				$('#reset-btn').click(function(){
+				function resetPage(){
 					$('form')[0].reset();
-					$('#submit').removeClass('redownload').val('提交');
+					$('#submit').removeClass('redownload').val('转换');
+					$feedback.text('');
 					pageNoResolve();
 					pageNoList = null;
 					lastUUID = null;
-				});
+					$('#progress')
+						.find('.progress-bar')
+						.attr('aria-valuenow', 0)
+						.css('width', 0)
+						.find('span')
+							.text('');
+				}
 				
 				$('#submit').click(function(){
 					if($(this).is('.redownload') && lastUUID){

@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipOutputStream;
 import org.springframework.util.StringUtils;
 
 import com.sowell.tools.model.demo.service.ZipService;
@@ -26,7 +26,9 @@ public class ZipServiceImpl implements ZipService{
 	@Override
 	public void zip(File[] files, OutputStream outputStream, String prefix, String extName, ProgressRecorder record) {
 		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+		zipOutputStream.setEncoding("gbk");
 		record = record == null? new ProgressRecorder(): record;
+		byte[] buf=new byte[10240];  
 		try {
 			int inc = 1;
 			Map<String, Integer> nameMap = new HashMap<String, Integer>();
@@ -43,21 +45,22 @@ public class ZipServiceImpl implements ZipService{
 						Integer existMax = nameMap.get(name);
 						if(existMax != null){
 							nameMap.put(name, ++existMax);
-							StringBuffer buf = new StringBuffer(name);
-							int dot = buf.lastIndexOf(".");
+							StringBuffer stringBuffer = new StringBuffer(name);
+							int dot = stringBuffer.lastIndexOf(".");
 							if(dot > 0){
-								buf.insert(dot, "(" + existMax + ")");
+								stringBuffer.insert(dot, "(" + existMax + ")");
 							}else{
-								buf.insert(0, "(" + existMax + ")");
+								stringBuffer.insert(0, "(" + existMax + ")");
 							}
 						}
 					}
 		            FileInputStream input = new FileInputStream(file);
 		            zipOutputStream.putNextEntry(new ZipEntry(name));
-		            int temp = 0;
-		            while((temp = input.read()) != -1){
-		            	zipOutputStream.write(temp);
-		            }
+		            int len;  
+	                while((len=input.read(buf))>0){  
+	                	zipOutputStream.write(buf,0,len);  
+	                }  
+		            zipOutputStream.closeEntry();
 		            input.close();
 				}
 				record.incStep();
