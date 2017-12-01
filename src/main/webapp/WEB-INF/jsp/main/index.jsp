@@ -75,6 +75,7 @@
 								<div class="col-lg-10">
 									<input class="btn btn-danger" target="_blank" type="button" value="设备标签" onclick="location.href='demo/print_tag.html'" />
 									<input class="btn btn-danger" target="_blank" type="button" value="批量设备标签" onclick="location.href='tag/device'" />
+									<a class="btn btn-danger" target="_blank" href="demo/materialsTag">材料标签</a>
 								</div>
 							</div>
 							<div class="row">

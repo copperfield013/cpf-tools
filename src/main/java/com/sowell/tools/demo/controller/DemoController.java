@@ -70,6 +70,10 @@ public class DemoController {
 		return "redirect:/main/index";
 	}
 	
+	@RequestMapping("/materialsTag")
+	public String goMaterialsTag(){
+		return "/demo/tag_materials_print.jsp";
+	}
 	
 	@RequestMapping("excel_rename")
 	public String excelRename(){
