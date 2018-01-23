@@ -139,6 +139,11 @@ public class TagPrintController {
 		return "/tag/comm_prop.jsp";
 	}
 	
+	@RequestMapping("/table_tag")
+	public String tableTag(){
+		return "/tag/table_tag.jsp";
+	}
+	
 	
 	
 	@ResponseBody

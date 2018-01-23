@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>cn.sowell.copframe</groupId>
 			<artifactId>cpf-utils</artifactId>
-			<version>0.3.1</version>
+			<version>0.3.7</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 		<dependency>
