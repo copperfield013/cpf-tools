@@ -1,5 +1,6 @@
 package com.sowell.tools.demo.controller;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,7 +18,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -38,11 +41,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import cn.sowell.copframe.dto.ajax.JsonResponse;
-import cn.sowell.copframe.dto.format.FormatUtils;
-import cn.sowell.copframe.utils.TextUtils;
-import cn.sowell.cpftools.model.tag.service.FileUploadUtils;
-
 import com.alibaba.fastjson.JSONObject;
 import com.mchange.v1.io.InputStreamUtils;
 import com.sowell.tools.imp.utils.Table;
@@ -52,8 +50,14 @@ import com.sowell.tools.model.demo.service.PeopleId;
 import com.sowell.tools.model.demo.service.ZipService;
 import com.sowell.tools.model.demo.service.impl.ZipServiceImpl;
 import com.sowell.tools.util.FileUtils;
+import com.sowell.tools.util.ImageHandler;
 import com.sowell.tools.util.ProgressBreakException;
 import com.sowell.tools.util.ProgressRecorder;
+
+import cn.sowell.copframe.dto.ajax.JsonResponse;
+import cn.sowell.copframe.dto.format.FormatUtils;
+import cn.sowell.copframe.utils.TextUtils;
+import cn.sowell.cpftools.model.tag.service.FileUploadUtils;
 
 @Controller
 @RequestMapping("/demo")
@@ -515,6 +519,26 @@ public class DemoController {
 		return jRes;
 	}
 	
+	
+	@RequestMapping("/eat")
+	public void eat(String foods, HttpServletResponse response){
+		if(foods != null) {
+			String[] array = foods.split("\r\n");
+			BufferedImage image = ImageHandler.renderImage(array);
+			response.setContentType("image/png");
+			try {
+				ImageIO.write(image, "png", response.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	@RequestMapping("/wantEat")
+	public String wantEat() {
+		return "/demo/want_eat.jsp";
+	}
 	
 	
 	public static void main(String[] args) {

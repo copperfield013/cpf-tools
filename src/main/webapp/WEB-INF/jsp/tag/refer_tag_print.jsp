@@ -110,7 +110,7 @@
 				<table>
 					<thead>
 						<tr>
-							<th id="title" colspan="4">\${infoNo}/129\${title}</th>
+							<th id="title" colspan="4">\${infoNo}\${title}</th>
 						</tr>
 						<tr>
 							<th width="25%">编号</th>
@@ -186,6 +186,7 @@
 							var infoNo = split[0],
 								title = split[1],
 								refer = split[2];
+							infoNo.replace(' ', '&nbsp;');
 							var $row = $mainTableRow.tmpl({
 								rowNo	: lastNo + parseInt(i) + 1,
 								infoNo	: infoNo,
